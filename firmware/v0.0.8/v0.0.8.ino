@@ -108,9 +108,9 @@ void fadeTowardColor( CRGB* L, uint16_t start, uint16_t N, const CRGB& bgColor, 
 	}
 }
 
-void color_fade_sweep(CRGB* L, RGB_LoadStruct *RGB_LOAD, const CRGB& targetColor){
+void color_fade_sweep(CRGB* L, uint16_t length, const CRGB& targetColor){
 	for (int i=0; i<255; i++){
-		fadeTowardColor( L, RGB_LOAD->startLedNumber, RGB_LOAD->endLedNumber, targetColor, 2);
+		fadeTowardColor( L, 0, length, targetColor, 2);
 		FastLED.show();
 		delay(20);
 	}	
@@ -123,7 +123,7 @@ void setup() {
 	Serial.begin(9600);
 	FastLED.addLeds<LED_TYPE, DATA_PIN, COLOR_ORDER>(leds, NUM_LEDS).setCorrection(TypicalLEDStrip);
 	CRGB targetColor(180, 180, 180);
-   	color_fade_sweep(leds, RGB_LOAD, targetColor);
+	color_fade_sweep(leds, NUM_LEDS, targetColor);
 }
 
 
@@ -134,12 +134,15 @@ void loop()
 	if (newData == true) {
 		strcpy(tempChars, receivedChars);
 		parse_data();
-        CRGB targetColor(redValue, greenValue, blueValue);
-    	color_fade_sweep(leds, RGB_LOAD, targetColor);
-   	    FastLED.show();
+		CRGB targetColor(redValue, greenValue, blueValue);
+		color_fade_sweep(leds, NUM_LEDS, targetColor);
+		FastLED.show();
 
-   	    newData = false;
-
-    }
+		sprintf(receivedChars, "red: %d, green: %d, blue: %d\r\n", redValue, greenValue, blueValue);
+		Serial.print(receivedChars);
+		receivedChars[0] = '\0';
+		tempChars[0] = '\0';
+		newData = false;
+	}
 
 }
